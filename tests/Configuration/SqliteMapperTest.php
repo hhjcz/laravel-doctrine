@@ -7,6 +7,7 @@ use Tests\Stubs\ApplicationStub;
 
 class SqliteMapperTest extends \PHPUnit_Framework_TestCase
 {
+	/** @var SqliteMapper */
 	private $sqlMapper;
 
 	public function setUp()
@@ -16,10 +17,10 @@ class SqliteMapperTest extends \PHPUnit_Framework_TestCase
 
 	public function testAppropriation()
 	{
-		$this->assertTrue($this->sqlMapper->isAppropriate(['driver' => 'sqlite']));
-		$this->assertFalse($this->sqlMapper->isAppropriate(['driver' => 'sqlsdfite']));
+		$this->assertTrue($this->sqlMapper->isAppropriateFor(['driver' => 'sqlite']));
+		$this->assertFalse($this->sqlMapper->isAppropriateFor(['driver' => 'sqlsdfite']));
 	}
-	
+
 	public function testMapping()
 	{
 		Facade::setFacadeApplication(new ApplicationStub);
