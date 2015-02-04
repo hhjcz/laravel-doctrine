@@ -16,13 +16,14 @@ class SqliteMapperTest extends \PHPUnit_Framework_TestCase
 
 	public function testAppropriation()
 	{
-		$this->assertTrue($this->sqlMapper->isAppropriate(['driver' => 'sqlite']));
-		$this->assertFalse($this->sqlMapper->isAppropriate(['driver' => 'sqlsdfite']));
+		$this->assertTrue($this->sqlMapper->isAppropriateFor(['driver' => 'sqlite']));
+		$this->assertFalse($this->sqlMapper->isAppropriateFor(['driver' => 'sqlsdfite']));
 	}
 	
 	public function testMapping()
 	{
 		Facade::setFacadeApplication(new ApplicationStub);
+
 		$configuration = [
 			'driver'   => 'sqlite',
 			'database' => 'db',
@@ -30,12 +31,16 @@ class SqliteMapperTest extends \PHPUnit_Framework_TestCase
 			'prefix'   => 'mitch_',
 			'charset'  => 'whatevs'
 		];
+		
 		$expected = [
 			'driver'   => 'pdo_sqlite',
-			'path'     => 'path/database/db.sqlite',
-			'user'     => $configuration['username']
+			'path'     => $configuration['database'],
+			'user'     => $configuration['username'],
+            'password' => null
 		];
+
 		$actual = $this->sqlMapper->map($configuration);
+
 		$this->assertEquals($expected, $actual);
 	}
 }
