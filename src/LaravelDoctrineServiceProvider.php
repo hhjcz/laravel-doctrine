@@ -3,12 +3,13 @@
 use App;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Events;
-use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Mapping\ClassMetadataFactory;
+use Doctrine\ORM\Tools\Setup;
 use Doctrine\Common\EventManager;
+use Illuminate\Auth\AuthManager;
 use Illuminate\Support\ServiceProvider;
 use Mitch\LaravelDoctrine\Cache;
-use Mitch\LaravelDoctrine\Configuration;
 use Mitch\LaravelDoctrine\Configuration\DriverMapper;
 use Mitch\LaravelDoctrine\Configuration\SqlMapper;
 use Mitch\LaravelDoctrine\Configuration\SqliteMapper;
@@ -17,15 +18,17 @@ use Mitch\LaravelDoctrine\EventListeners\SoftDeletableListener;
 use Mitch\LaravelDoctrine\Filters\TrashedFilter;
 use Mitch\LaravelDoctrine\Validation\DoctrinePresenceVerifier;
 
-class LaravelDoctrineServiceProvider extends ServiceProvider {
-
+class LaravelDoctrineServiceProvider extends ServiceProvider
+{
     /**
      * Indicates if loading of the provider is deferred.
      * @var bool
      */
     protected $defer = false;
 
-    public function boot() {
+    public function boot()
+    {
+        $this->package('mitchellvanw/laravel-doctrine', 'doctrine', __DIR__ . '/..');
         $this->extendAuthManager();
     }
 
@@ -33,19 +36,14 @@ class LaravelDoctrineServiceProvider extends ServiceProvider {
      * Register the service provider.
      * @return void
      */
-    public function register() {
+    public function register()
+    {
         $this->registerConfigurationMapper();
         $this->registerCacheManager();
         $this->registerEntityManager();
         $this->registerClassMetadataFactory();
         $this->registerValidationVerifier();
-
-        $this->commands([
-            'Mitch\LaravelDoctrine\Console\GenerateProxiesCommand',
-            'Mitch\LaravelDoctrine\Console\SchemaCreateCommand',
-            'Mitch\LaravelDoctrine\Console\SchemaUpdateCommand',
-            'Mitch\LaravelDoctrine\Console\SchemaDropCommand'
-        ]);
+        $this->registerConsoleCommands();
     }
 
     /**
@@ -155,5 +153,31 @@ class LaravelDoctrineServiceProvider extends ServiceProvider {
         $default = $config['database.default'];
         $connection = $config["database.connections.{$default}"];
         return App::make('Mitch\LaravelDoctrine\Configuration\DriverMapper')->map($connection);
+        return App::make('Mitch\LaravelDoctrine\Configuration\DriverMapper')->map($connection);
+
+    }
+
+    private function registerConsoleCommands() {
+        $this->commands([
+            'Mitch\LaravelDoctrine\Console\InfoCommand',
+            'Mitch\LaravelDoctrine\Console\GenerateProxiesCommand',
+            'Mitch\LaravelDoctrine\Console\GenerateEntitiesCommand',
+            'Mitch\LaravelDoctrine\Console\GenerateRepositoriesCommand',
+            'Mitch\LaravelDoctrine\Console\SchemaCreateCommand',
+            'Mitch\LaravelDoctrine\Console\SchemaUpdateCommand',
+            'Mitch\LaravelDoctrine\Console\SchemaDropCommand',
+            'Mitch\LaravelDoctrine\Console\SchemaValidateCommand',
+            'Mitch\LaravelDoctrine\Console\DqlCommand',
+            'Mitch\LaravelDoctrine\Console\SqlCommand',
+            'Mitch\LaravelDoctrine\Console\EnsureProductionSettingsCommand',
+            'Mitch\LaravelDoctrine\Console\CacheClearQueryCommand',
+            'Mitch\LaravelDoctrine\Console\CacheClearMetadataCommand',
+            'Mitch\LaravelDoctrine\Console\CacheClearResultCommand',
+            'Mitch\LaravelDoctrine\Console\CacheClearCollectionRegionCommand',
+            'Mitch\LaravelDoctrine\Console\CacheClearEntityRegionCommand',
+            'Mitch\LaravelDoctrine\Console\CacheClearQueryRegionCommand',
+            'Mitch\LaravelDoctrine\Console\ImportSqlCommand',
+            'Mitch\LaravelDoctrine\Console\MappingDescribeCommand',
+        ]);
     }
 }
