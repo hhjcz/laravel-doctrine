@@ -287,6 +287,6 @@ class LaravelDoctrineServiceProvider extends ServiceProvider
      */
     private function mapLaravelToDoctrineConfig($databaseConfig)
     {
-        return $this->app->make(DriverMapper::class)->map($databaseConfig);
+        return $this->app->make('Mitch\LaravelDoctrine\Configuration\DriverMapper')->map($databaseConfig);
     }
 }
