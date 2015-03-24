@@ -68,7 +68,7 @@ class LaravelDoctrineServiceProvider extends ServiceProvider
      */
     private function registerConfigurationMapper()
     {
-        $this->app->bind(DriverMapper::class, function () {
+        $this->app->bind('Mitch\LaravelDoctrine\Configuration\DriverMapper', function () {
             $mapper = new DriverMapper;
             $mapper->registerMapper(new SqlMapper);
             $mapper->registerMapper(new SqliteMapper);
@@ -84,13 +84,13 @@ class LaravelDoctrineServiceProvider extends ServiceProvider
     public function registerValidationVerifier()
     {
         $this->app->bind('validation.presence', function() {
-            return new DoctrinePresenceVerifier($this->app[EntityManagerInterface::class]);
+            return new DoctrinePresenceVerifier($this->app['Doctrine\ORM\EntityManagerInterface']);
         }, true);
     }
 
     public function registerCacheManager()
     {
-        $this->app->bind(CacheManager::class, function ($app) {
+        $this->app->bind('Mitch\LaravelDoctrine\CacheManager', function ($app) {
             $manager = new CacheManager(config('doctrine.cache'));
             $manager->add(new Cache\ApcProvider);
             $manager->add(new Cache\MemcacheProvider);
@@ -120,7 +120,7 @@ class LaravelDoctrineServiceProvider extends ServiceProvider
             $useSimpleAnnotationReader
         );
 
-        $metadata->addFilter('trashed', TrashedFilter::class);
+        $metadata->addFilter('trashed', 'Mitch\LaravelDoctrine\Filters\TrashedFilter');
         $metadata->setAutoGenerateProxyClasses($autoGenerateProxyClasses);
         if ($proxyNamespace) {
             $metadata->setProxyNamespace($config['proxy']['namespace']);
@@ -214,7 +214,7 @@ class LaravelDoctrineServiceProvider extends ServiceProvider
 
     private function registerManagerRegistry()
     {
-        $this->app->singleton(IlluminateRegistry::class, function ($app) {
+        $this->app->singleton('Mitch\LaravelDoctrine\IlluminateRegistry', function ($app) {
             $config = config('doctrine');
             $databaseConnections = config('database')['connections'];
             $defaultDatabase = config('database')['default'];
@@ -225,7 +225,7 @@ class LaravelDoctrineServiceProvider extends ServiceProvider
                 $config,
                 $databaseConnections,
                 $app['config']['app.debug'],
-                $app[CacheManager::class]
+                $app['Mitch\LaravelDoctrine\CacheManager']
             );
 
             return new IlluminateRegistry(
@@ -234,21 +234,21 @@ class LaravelDoctrineServiceProvider extends ServiceProvider
                 $registryManagers
             );
         });
-        $this->app->alias(IlluminateRegistry::class, ManagerRegistry::class);
+        $this->app->alias('Mitch\LaravelDoctrine\IlluminateRegistry', 'Doctrine\Common\Persistence\ManagerRegistry');
     }
 
     private function registerEntityManager()
     {
-        $this->app->singleton(EntityManager::class, function ($app) {
-            return $app->make(IlluminateRegistry::class)->getManager();
+        $this->app->singleton('Doctrine\ORM\EntityManager', function ($app) {
+            return $app->make('Mitch\LaravelDoctrine\IlluminateRegistry')->getManager();
         });
-        $this->app->alias(EntityManager::class, EntityManagerInterface::class);
+        $this->app->alias('Doctrine\ORM\EntityManager', 'Doctrine\ORM\EntityManagerInterface');
     }
 
     private function registerClassMetadataFactory()
     {
-        $this->app->singleton(ClassMetadataFactory::class, function ($app) {
-            return $app[EntityManager::class]->getMetadataFactory();
+        $this->app->singleton('Doctrine\ORM\Mapping\ClassMetadataFactory', function ($app) {
+            return $app['Doctrine\ORM\EntityManager']->getMetadataFactory();
         });
     }
 
@@ -257,7 +257,7 @@ class LaravelDoctrineServiceProvider extends ServiceProvider
         $this->app[AuthManager::class]->extend('doctrine', function ($app) {
             return new DoctrineUserProvider(
                 $app['Illuminate\Contracts\Hashing\Hasher'],
-                $app[IlluminateRegistry::class],
+                $app['Mitch\LaravelDoctrine\IlluminateRegistry'],
                 config('auth.model')
             );
         });
@@ -270,11 +270,11 @@ class LaravelDoctrineServiceProvider extends ServiceProvider
     public function provides()
     {
         return [
-            CacheManager::class,
-            EntityManagerInterface::class,
-            EntityManager::class,
-            ClassMetadataFactory::class,
-            DriverMapper::class,
+            'Mitch\LaravelDoctrine\CacheManager',
+            'Doctrine\ORM\EntityManagerInterface',
+            'Doctrine\ORM\EntityManager',
+            'Doctrine\ORM\Mapping\ClassMetadataFactory',
+            'Mitch\LaravelDoctrine\Configuration\DriverMapper',
             AuthManager::class,
         ];
     }
