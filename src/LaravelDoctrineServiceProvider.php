@@ -254,7 +254,7 @@ class LaravelDoctrineServiceProvider extends ServiceProvider
 
     private function extendAuthManager()
     {
-        $this->app[AuthManager::class]->extend('doctrine', function ($app) {
+        $this->app['Illuminate\Auth\AuthManager']->extend('doctrine', function ($app) {
             return new DoctrineUserProvider(
                 $app['Illuminate\Contracts\Hashing\Hasher'],
                 $app['Mitch\LaravelDoctrine\IlluminateRegistry'],
@@ -275,7 +275,7 @@ class LaravelDoctrineServiceProvider extends ServiceProvider
             'Doctrine\ORM\EntityManager',
             'Doctrine\ORM\Mapping\ClassMetadataFactory',
             'Mitch\LaravelDoctrine\Configuration\DriverMapper',
-            AuthManager::class,
+            'Illuminate\Auth\AuthManager',
         ];
     }
 
